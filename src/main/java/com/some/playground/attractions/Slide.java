@@ -1,20 +1,12 @@
 package com.some.playground.attractions;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-
-@Data
-@EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 public class Slide extends PlaySite {
-
     public Slide(int maxKids, int snapshotInterval) {
         super(maxKids, snapshotInterval);
-    }
-
-    @Override
-    BigDecimal getUtilizationPercents() {
-        return BigDecimal.valueOf((this.playingKids.size() * 100) / this.maxKids);
     }
 }

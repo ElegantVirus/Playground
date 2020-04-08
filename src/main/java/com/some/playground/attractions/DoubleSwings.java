@@ -1,21 +1,20 @@
 package com.some.playground.attractions;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 public class DoubleSwings extends PlaySite {
-
-    public DoubleSwings(int maxKids, int snapshotInterval) {
-        super(maxKids, snapshotInterval);
+    public DoubleSwings(int snapshotInterval) {
+        super(2, snapshotInterval);
     }
 
     @Override
     BigDecimal getUtilizationPercents() {
-        if (this.playingKids.size() == this.maxKids) {
+        if (getPlayingKids().size() == getMaxKids()) {
             return BigDecimal.valueOf(100);
         } else {
             return BigDecimal.valueOf(0);

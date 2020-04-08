@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Carousel extends PlaySite {
-    public Carousel(int maxKids, int snapshotInterval) {
+public class BallPit extends PlaySite {
+    public BallPit(int maxKids, int snapshotInterval) {
         super(maxKids, snapshotInterval);
     }
 }

@@ -1,32 +1,32 @@
 package com.some.playground.attractions;
 
 import com.some.playground.visitors.Kid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Data
 /*
    "Some not yet known play sites can have different calculation
    implementations, this possible extension requirement should reflect in design."
-   The new classes can extend PlaySite to functiono properly in the context.
+   The new classes can extend PlaySite to function properly in the context.
  */
+@Getter
+@Setter
 public abstract class PlaySite {
-    List<Kid> waitingKids;
-    List<Kid> playingKids;
-    List<Kid> kidsWhoHaveVisited;
-    List<PlaysiteSnapshot> playsiteSnapshotList;
-    int maxKids;
-    int snapshotInterval;
+    private List<Kid> waitingKids;
+    private List<Kid> playingKids;
+    private List<Kid> kidsWhoHaveVisited;
+    private List<PlaySiteSnapshot> playSiteSnapshotList;
+    private int maxKids;
+    private int snapshotInterval;
 
     public PlaySite(int maxKids, int snapshotInterval) {
         waitingKids = new ArrayList<>();
         playingKids = new ArrayList<>();
         kidsWhoHaveVisited = new ArrayList<>();
-        playsiteSnapshotList = new ArrayList<>();
+        playSiteSnapshotList = new ArrayList<>();
         this.maxKids = maxKids;
         this.snapshotInterval = snapshotInterval;
         registerSnapshot();
@@ -39,10 +39,12 @@ public abstract class PlaySite {
      *
      * @return utilization percents.
      */
-    abstract BigDecimal getUtilizationPercents();
+    BigDecimal getUtilizationPercents() {
+        return BigDecimal.valueOf((getPlayingKids().size() * 100) / getMaxKids());
+    }
 
     public boolean tooManyKids() {
-        return playingKids.size() == this.maxKids;
+        return playingKids.size() == maxKids;
     }
 
     /**
@@ -54,11 +56,11 @@ public abstract class PlaySite {
      */
     public void addKid(Kid kid) throws IllegalAccessException {
         if (tooManyKids()) {
-            if (kid.isWaiting()) {
+            if (kid.isWillingToWait()) {
                 if (kid.isVip()) {
                     makeVipWait(kid);
                 } else {
-                    this.waitingKids.add(kid);
+                    waitingKids.add(kid);
                 }
             } else {
                 throw new IllegalAccessException("The kid does not accept to wait in the queue!");
@@ -71,9 +73,7 @@ public abstract class PlaySite {
     }
 
     private void startKidsHistoryRecord(Kid kid) {
-        Kid.KidsHistory kidsHistory = new Kid.KidsHistory();
-        kidsHistory.setPlaySite(this);
-        kidsHistory.setStartTime(LocalDateTime.now());
+        Kid.KidsHistory kidsHistory = new Kid.KidsHistory(this, LocalDateTime.now());
         kid.getHistoryList().add(kidsHistory);
     }
 
@@ -89,19 +89,19 @@ public abstract class PlaySite {
         Kid lastVipKid = getLastVipKid();
 
         if (lastVipKid == null) {
-            this.waitingKids.add(0, kid);
+            waitingKids.add(0, kid);
         } else {
-            int index = this.waitingKids.indexOf(lastVipKid);
-            if (index + 4 > this.waitingKids.size()) {
-                this.waitingKids.add(kid);
+            int index = waitingKids.indexOf(lastVipKid);
+            if (index + 4 > waitingKids.size()) {
+                waitingKids.add(kid);
             } else {
-                this.waitingKids.add(index + 4, kid);
+                waitingKids.add(index + 4, kid);
             }
         }
     }
 
     private Kid getLastVipKid() {
-        return this.waitingKids
+        return waitingKids
                 .stream()
                 .filter(Kid::isVip)
                 .reduce((first, second) -> second)
@@ -123,17 +123,16 @@ public abstract class PlaySite {
         PlaySite playSite = this;
         TimerTask task = new TimerTask() {
             public void run() {
-                playsiteSnapshotList.add(new PlaysiteSnapshot(playSite, getUtilizationPercents()));
+                playSiteSnapshotList.add(new PlaySiteSnapshot(playSite, getUtilizationPercents()));
             }
         };
 
         new Timer().scheduleAtFixedRate(task, 0, snapshotInterval * 1000);
     }
 
-    @AllArgsConstructor
-    @Data
-    public static class PlaysiteSnapshot {
-        private PlaySite playSite;
-        private BigDecimal utilization;
+    @Value
+    public static class PlaySiteSnapshot {
+        PlaySite playSite;
+        BigDecimal utilization;
     }
 }

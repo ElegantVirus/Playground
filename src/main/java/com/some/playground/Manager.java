@@ -2,28 +2,29 @@ package com.some.playground;
 
 import com.some.playground.attractions.PlaySite;
 import com.some.playground.visitors.Kid;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
 public class Manager {
-    List<PlaySite> playSiteList;
+    private List<PlaySite> playSiteList;
 
     public Manager() {
-        this.playSiteList = new ArrayList<>();
+        playSiteList = new ArrayList<>();
     }
 
-    public void addPlaysite(PlaySite playSite) {
+    public void addPlaySite(PlaySite playSite) {
         playSiteList.add(playSite);
     }
 
-    public void addKidToThePlaysite(PlaySite playSite, Kid kid) throws IllegalAccessException {
+    public void addKidToThePlaySite(PlaySite playSite, Kid kid) throws IllegalAccessException {
         playSite.addKid(kid);
     }
 
-    public void removeKidFromThePlaysite(PlaySite playSite, Kid kid) {
+    public void removeKidFromThePlaySite(PlaySite playSite, Kid kid) {
         playSite.removeKid(kid);
     }
 
@@ -31,27 +32,28 @@ public class Manager {
         return kid.getHistoryList();
     }
 
-    public List<PlaySite.PlaysiteSnapshot> getSnapshotsOfThePlaysite(PlaySite playSite) {
-        return playSite.getPlaysiteSnapshotList();
+    public List<PlaySite.PlaySiteSnapshot> getSnapshotsOfThePlaySite(PlaySite playSite) {
+        return playSite.getPlaySiteSnapshotList();
     }
 
-    public int getTotalKidsOnPlaysite(PlaySite playSite) {
+    public int getTotalKidsOnPlaySite(PlaySite playSite) {
         return (int) playSite.getKidsWhoHaveVisited().stream().distinct().count();
     }
 
-    public int getTotalKidsOnAllPlaysites() {
+    public int getTotalKidsOnAllPlaySites() {
         return (int) playSiteList
                 .stream()
-                .flatMap(playSite -> playSite.getKidsWhoHaveVisited().stream())
+                .map(PlaySite::getKidsWhoHaveVisited)
+                .flatMap(Collection::stream)
                 .distinct()
                 .count();
     }
 
-    public List<Kid> getPlaysitesPlayingKids(PlaySite playSite) {
+    public List<Kid> getPlaySitesPlayingKids(PlaySite playSite) {
         return playSite.getPlayingKids();
     }
 
-    public List<Kid> getPlaysitesKidsInQueue(PlaySite playSite) {
+    public List<Kid> getPlaySitesKidsInQueue(PlaySite playSite) {
         return playSite.getWaitingKids();
     }
 }
